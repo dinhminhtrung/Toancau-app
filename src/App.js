@@ -39,13 +39,14 @@ import {
 } from 'lucide-react';
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCVzgO-hA6-1XrFyuSE6ZVH...", 
+  authDomain: "appyou-a07df.firebaseapp.com",
+  projectId: "appyou-a07df",
+  storageBucket: "appyou-a07df.appspot.com",
+  messagingSenderId: "987914440691",
+  appId: "1:987914440691:web:b6b619d86..."
 };
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
