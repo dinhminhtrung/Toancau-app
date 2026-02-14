@@ -49,7 +49,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'toan-cau-bidding-final';
+const appId = "appyou-a07df";
+
 
 const GlobalLogo = ({ className }) => (
   <svg viewBox="0 0 200 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
