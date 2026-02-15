@@ -200,11 +200,50 @@ const App = () => {
       </div>
 
       <div className="flex-1 p-4 md:p-10 overflow-y-auto">
-        {activeTab === 'dashboard' && <DashboardView userData={userData} sessions={sessions} bids={bids} />}
-        {activeTab === 'users' && <UserManagementView db={db} appId={appId} suppliers={suppliers} isRoot={userData.isRoot} />}
-        {activeTab === 'sessions' && <SessionManagementView db={db} appId={appId} sessions={sessions} />}
-        {activeTab === 'history' && <FullHistoryView bids={bids} />}
-      </div>
+
+  {userData.role === 'ncc' ? (
+
+    <SupplierView 
+      db={db}
+      appId={appId}
+      userData={userData}
+      sessions={sessions}
+      bids={bids}
+    />
+
+  ) : (
+
+    <>
+      {activeTab === 'dashboard' && 
+        <DashboardView userData={userData} sessions={sessions} bids={bids} />
+      }
+
+      {activeTab === 'users' && 
+        <UserManagementView 
+          db={db} 
+          appId={appId} 
+          suppliers={suppliers} 
+          isRoot={userData.isRoot} 
+        />
+      }
+
+      {activeTab === 'sessions' && 
+        <SessionManagementView 
+          db={db} 
+          appId={appId} 
+          sessions={sessions} 
+        />
+      }
+
+      {activeTab === 'history' && 
+        <FullHistoryView bids={bids} />
+      }
+    </>
+
+  )}
+
+</div>
+
 
       {/* Modal Tự đổi mật khẩu */}
       {showSelfChangePass && (
@@ -409,3 +448,112 @@ const FullHistoryView = ({ bids }) => (
 );
 
 export default App;
+
+const SupplierView = ({ db, appId, userData, sessions, bids }) => {
+  const [price, setPrice] = React.useState('');
+  const now = new Date();
+
+  const activeSessions = sessions.filter(s => {
+    return now >= new Date(s.startTime) && now <= new Date(s.endTime);
+  });
+
+  const myBids = bids.filter(b => b.supplierId === userData.id);
+
+  const handleBid = async (session) => {
+    if (!price) {
+      alert("Vui lòng nhập giá");
+      return;
+    }
+
+    await addDoc(
+      collection(db, 'artifacts', appId, 'public', 'data', 'bids'),
+      {
+        supplierId: userData.id,
+        supplierName: userData.name,
+        sessionId: session.id,
+        sessionName: session.name,
+        price: Number(price),
+        timestamp: new Date().toISOString()
+      }
+    );
+
+    setPrice('');
+    alert("Gửi báo giá thành công!");
+  };
+
+  return (
+    <div className="space-y-8">
+
+      <h1 className="text-2xl font-bold">
+        Xin chào {userData.name}
+      </h1>
+
+      {/* Phiên đang mở */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">
+          Phiên đang mở
+        </h2>
+
+        {activeSessions.length === 0 && (
+          <p>Hiện chưa có phiên đấu thầu nào đang diễn ra.</p>
+        )}
+
+        {activeSessions.map(session => (
+          <div key={session.id} className="bg-white p-4 rounded shadow mb-4">
+            <h3 className="font-bold">{session.name}</h3>
+
+            <div className="flex gap-2 mt-3">
+              <input
+                type="number"
+                placeholder="Nhập giá..."
+                className="border p-2 rounded"
+                value={price}
+                onChange={e => setPrice(e.target.value)}
+              />
+
+              <button
+                onClick={() => handleBid(session)}
+                className="bg-green-600 text-white px-4 py-2 rounded"
+              >
+                Gửi giá
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Lịch sử của NCC */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">
+          Lịch sử bỏ thầu của tôi
+        </h2>
+
+        <div className="bg-white rounded shadow">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-2 text-left">Ngày</th>
+                <th className="p-2 text-left">Phiên</th>
+                <th className="p-2 text-left">Giá</th>
+              </tr>
+            </thead>
+            <tbody>
+              {myBids.map(bid => (
+                <tr key={bid.id} className="border-t">
+                  <td className="p-2">
+                    {new Date(bid.timestamp).toLocaleString()}
+                  </td>
+                  <td className="p-2">{bid.sessionName}</td>
+                  <td className="p-2 font-bold text-green-600">
+                    {bid.price?.toLocaleString()} đ
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  );
+};
