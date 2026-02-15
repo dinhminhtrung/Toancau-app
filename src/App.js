@@ -132,8 +132,9 @@ function Dashboard({ user, sessions, bids }) {
   const now = new Date();
 
   const activeSessions = sessions.filter(
-    s => now >= new Date(s.startTime) && now <= new Date(s.endTime)
-  );
+  s => new Date(s.endTime) > new Date()
+);
+
 
   const handleBid = async session => {
     if (!priceInput[session.id]) return alert("Nhập giá trước");
